@@ -94,9 +94,14 @@ function connection(){
         app.get('/tray', async(req, res) => {
             try {
                 const decoded = jwt.verify(tokenInCookie, process.env.SECRET, header);
-                const user = await User.findOne({_id: decoded.userId});
+                const user = await User.findOne({_id: decoded.userId}).populate('tray');
                 console.log(decoded);
-                res.json(user.tray);
+                let totalPrice = 0;
+                user.tray.map(food => {
+                    totalPrice += food.price;
+                });
+                res.json({tray: user.tray, 
+                    totalPrice: totalPrice});
             } catch(err) {
                 console.error(err)
                 res.send('An error occurred. Try to log in again.')
